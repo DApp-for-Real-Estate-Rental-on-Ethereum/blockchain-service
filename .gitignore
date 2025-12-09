@@ -1,0 +1,18 @@
+# Hardhat files
+node_modules/
+artifacts/
+cache/
+coverage/
+typechain-types/
+
+# Deployment files
+deployments/*.json
+!deployments/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+

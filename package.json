@@ -1,0 +1,17 @@
+{
+  "name": "blockchain-service",
+  "version": "1.0.0",
+  "description": "Smart contracts for payment escrow using Hardhat",
+  "scripts": {
+    "compile": "hardhat compile",
+    "node": "hardhat node",
+    "deploy:complete": "hardhat run scripts/deploy-booking-payment-complete.js --network localhost",
+    "get-accounts": "hardhat run scripts/get-accounts.js --network localhost",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  }
+}
+
