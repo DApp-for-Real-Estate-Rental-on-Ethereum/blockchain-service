@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS-18'  // Must match the name configured in Jenkins Tools
+        nodejs 'NodeJS-22'  // Must match the name configured in Jenkins Tools (Hardhat requires Node 22+)
     }
 
     environment {
