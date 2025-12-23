@@ -141,7 +141,7 @@ pipeline {
                 """
             }
             // Clean workspace
-            cleanWs()
+            deleteDir()
         }
         success {
             echo "Blockchain-service pipeline completed successfully! 🎉"
