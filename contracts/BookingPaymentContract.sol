@@ -152,23 +152,31 @@ contract BookingPaymentContract {
         
         if (!booking.hasActiveReclamation) {
             platformFee = (rentAmount * PLATFORM_FEE_PERCENT) / 100;
-            
-            booking.rentAmount = rentAmount - platformFee;
-            
+            uint256 rentToHost = rentAmount - platformFee;
+
+            // Transfer to Host
+            (bool hostOk, ) = booking.host.call{value: rentToHost}("");
+            require(hostOk, "Host transfer failed");
+
+            // Transfer Deposit to Guest
+            (bool guestOk, ) = booking.guest.call{value: depositAmount}("");
+            require(guestOk, "Guest transfer failed");
+
+            // Transfer Fee to Platform
+            if (platformFee > 0) {
+                (bool feeOk, ) = PLATFORM_WALLET.call{value: platformFee}("");
+                require(feeOk, "Platform fee transfer failed");
+            }
+
+            booking.rentAmount = 0;
+            booking.depositAmount = 0;
             booking.completedAt = block.timestamp;
         } else {
             require(totalAmount > 0, "No funds to hold");
             booking.completedAt = block.timestamp;
         }
-        
-        booking.completed = true;
 
-        if (!booking.hasActiveReclamation) {
-            if (platformFee > 0) {
-                (bool feeOk, ) = PLATFORM_WALLET.call{value: platformFee}("");
-                require(feeOk, "Platform fee transfer failed");
-            }
-        }
+        booking.completed = true;
 
         emit BookingCompleted(
             bookingId,
