@@ -19,7 +19,7 @@ async function main() {
 
   const network = hre.network.name;
   const chainId = (await hre.ethers.provider.getNetwork()).chainId;
-  
+
   console.log(`\n📡 Network: ${network}`);
   console.log(`🔗 Chain ID: ${chainId.toString()}`);
 
@@ -27,7 +27,7 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   const deployerAddress = await deployer.getAddress();
   const deployerBalance = await hre.ethers.provider.getBalance(deployerAddress);
-  
+
   console.log(`\n👤 Deployer Account:`);
   console.log(`   Address: ${deployerAddress}`);
   console.log(`   Balance: ${hre.ethers.formatEther(deployerBalance)} ETH`);
@@ -36,10 +36,10 @@ async function main() {
   console.log(`\n📦 Deploying BookingPaymentContract...`);
   const BookingPaymentContract = await hre.ethers.getContractFactory("BookingPaymentContract");
   const bookingPayment = await BookingPaymentContract.deploy();
-  
+
   await bookingPayment.waitForDeployment();
   const contractAddress = await bookingPayment.getAddress();
-  
+
   console.log(`\n✅ Contract deployed successfully!`);
   console.log(`   Address: ${contractAddress}`);
 
@@ -56,7 +56,7 @@ async function main() {
   const platformWallet = await bookingPayment.PLATFORM_WALLET();
   const platformFee = await bookingPayment.PLATFORM_FEE_PERCENT();
   const admin = await bookingPayment.admin();
-  
+
   console.log(`\n📊 Contract Configuration:`);
   console.log(`   Platform Wallet: ${platformWallet}`);
   console.log(`   Platform Fee: ${platformFee.toString()}%`);
@@ -77,7 +77,7 @@ async function main() {
       const account = accounts[i];
       const address = await account.getAddress();
       const balance = await hre.ethers.provider.getBalance(address);
-      
+
       // For account #0, this is the admin - save private key info
       if (i === 0) {
         accountsInfo.push({
@@ -236,19 +236,19 @@ await contract.getContractBalance();
     console.log(`\n🔄 Attempting to update application.properties...`);
     try {
       let properties = fs.readFileSync(appPropertiesPath, "utf8");
-      
+
       // Update contract address
       properties = properties.replace(
         /app\.web3\.contract-address=.*/,
         `app.web3.contract-address=${contractAddress}`
       );
-      
+
       // Update chain ID
       properties = properties.replace(
         /app\.web3\.chain-id=.*/,
         `app.web3.chain-id=${chainId}`
       );
-      
+
       // Update RPC URL if needed
       if (network === "localhost") {
         properties = properties.replace(
@@ -256,7 +256,7 @@ await contract.getContractBalance();
           `app.web3.rpc-url=http://127.0.0.1:8545`
         );
       }
-      
+
       fs.writeFileSync(appPropertiesPath, properties);
       console.log(`   ✅ application.properties updated successfully!`);
     } catch (error) {
@@ -266,6 +266,22 @@ await contract.getContractBalance();
   } else {
     console.log(`\n⚠️  application.properties not found at: ${appPropertiesPath}`);
     console.log(`   Please update manually with the contract address above`);
+  }
+
+  // Update Frontend Configuration
+  const frontendConfigPath = path.join(__dirname, "..", "..", "derent-main", "lib", "config", "contracts.json");
+  console.log(`\n🔄 Attempting to update frontend contracts.json...`);
+  try {
+    const frontendData = {
+      chainId: chainId.toString(),
+      address: contractAddress,
+      network: network,
+      abi: JSON.parse(fs.readFileSync(path.join(__dirname, "..", "artifacts", "contracts", "BookingPaymentContract.sol", "BookingPaymentContract.json"))).abi
+    };
+    fs.writeFileSync(frontendConfigPath, JSON.stringify(frontendData, null, 2));
+    console.log(`   ✅ contracts.json updated successfully at ${frontendConfigPath}`);
+  } catch (error) {
+    console.warn(`   ⚠️  Could not update frontend config: ${error.message}`);
   }
 
   // Summary
